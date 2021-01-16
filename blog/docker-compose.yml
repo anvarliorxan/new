@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "db"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    volumes:
+      - ./../postgres_volumes:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: bash -c "python manage.py makemigrations --settings=blog.settings.production &&
+                      python manage.py migrate --settings=blog.settings.production &&
+                      python manage.py runserver 0.0.0.0:8000 --settings=blog.settings.production &&
+                      celery -A blog beat && celery -A blog worker -l info"
+    volumes:
+      - ./:/usr/src/app/
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+  redis:
+    image: redis:alpine
+    depends_on:
+      - db
+      - web
