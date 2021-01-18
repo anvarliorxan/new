@@ -132,8 +132,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
 from celery.schedules import crontab
 

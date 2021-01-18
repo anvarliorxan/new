@@ -15,3 +15,4 @@ DATABASES = {
 CELERY_BROKER_URL = "redis://redis:6379"
 CELERY_RESULT_BACKEND = "redis://redis:6379"
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
