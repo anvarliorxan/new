@@ -13,9 +13,10 @@ services:
 
   web:
     build: .
-    command: bash -c "python manage.py makemigrations --settings=blog.settings.production &&
-                      python manage.py migrate --settings=blog.settings.production &&
-                      python manage.py runserver 0.0.0.0:8000 --settings=blog.settings.production &&
+    command: bash -c "python manage.py makemigrations &&
+                      python manage.py collectstatic
+                      python manage.py migrate &&
+                      python manage.py runserver 0.0.0.0:8000  &&
     volumes:
       - ./:/usr/src/app/
     ports:
@@ -26,3 +27,20 @@ services:
     image: redis:alpine
     depends_on:
       - db
+
+  celery:
+      build: .
+      command: celery -A blog worker -l info
+      volumes:
+          - ./:/usr/src/app/
+      depends_on:
+        - web
+        - redis
+  celery-beat:
+    build: .
+    command: celery -A blog beat
+    volumes:
+      - ./:/usr/src/app/
+    depends_on:
+      - web
+      - redis

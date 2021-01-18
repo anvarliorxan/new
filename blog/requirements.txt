@@ -6,5 +6,5 @@ python-dotenv==0.15.0
 celery==4.4.1
 redis==3.4.1
 psycopg2
-gunicorn
+
 
