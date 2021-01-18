@@ -13,41 +13,18 @@ services:
 
   web:
     build: .
-    command: bash -c "python manage.py makemigrations --settings=blog.settings.development &&
-                      python manage.py migrate --settings=blog.settings.development &&
-                      python manage.py collectstatic --settings=blog.settings.development
-                      python manage.py runserver 0.0.0.0:8000 --settings=blog.settings.production"
+    command: bash -c "python manage.py makemigrations --settings=blog.settings.production &&
+                      python manage.py migrate --settings=blog.settings.production &&
+                      python manage.py runserver 0.0.0.0:8000 --settings=blog.settings.production &&
+                      celery -A blog beat && celery -A blog worker -l info"
     volumes:
       - ./:/usr/src/app/
-    environment:
-      - DEBUG=1
-      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1
-      - CELERY_BROKER=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
     ports:
       - 8000:8000
     depends_on:
       - db
-      - redis
-  celery:
-      build: .
-      command: celery -A blog worker -l info
-      volumes:
-          - .:/usr/src/app
-      depends_on:
-          - web
-          - redis
-
-  celery-beat:
-    build: .
-    command: celery -A blog beat
-    volumes:
-      - .:/usr/src/app
-    depends_on:
-      - redis
-      - web
-
   redis:
     image: redis:alpine
     depends_on:
       - db
+      - web
